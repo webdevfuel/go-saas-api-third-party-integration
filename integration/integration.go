@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type Tag struct {
@@ -49,4 +51,20 @@ func NewRequest(method, url string) (*http.Request, error) {
 		return nil, err
 	}
 	return resp, nil
+}
+
+func GetIntegrationApp(id int, conn *sqlx.DB) (string, error) {
+	var app string
+	err := conn.QueryRow(`
+		SELECT
+		    apps.slug
+		FROM
+		    integrations
+		    LEFT JOIN apps ON integrations.app_id = apps.id
+		WHERE
+		    integrations.id = $1`, id).Scan(&app)
+	if err != nil {
+		return "", err
+	}
+	return app, nil
 }
