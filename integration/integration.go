@@ -15,3 +15,11 @@ type App interface {
 	GetTagsPath() string
 	UnmarshalTags(body []byte) ([]Tag, error)
 }
+
+func NewRequest(method, url string) (*http.Request, error) {
+	resp, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
