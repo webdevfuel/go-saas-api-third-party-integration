@@ -68,3 +68,15 @@ func GetIntegrationApp(id int, conn *sqlx.DB) (string, error) {
 	}
 	return app, nil
 }
+
+func getFieldValue(conn *sqlx.DB, id int, value string, destination any) error {
+	return conn.QueryRow(`
+		SELECT
+		    integration_app_field_values.value
+		FROM
+		    integration_app_field_values
+		    LEFT JOIN app_fields ON integration_app_field_values.app_field_id = app_fields.id
+		WHERE
+		    integration_app_field_values.integration_id = $1
+		    AND field = $2`, id, value).Scan(destination)
+}
