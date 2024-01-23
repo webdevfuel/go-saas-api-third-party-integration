@@ -3,7 +3,8 @@ package integration
 import (
 	"encoding/json"
 	"net/http"
-	"os"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type ActiveCampaignTags struct {
@@ -44,10 +45,23 @@ func (integration ActiveCampaignIntegration) UnmarshalTags(data []byte) ([]Tag, 
 	return tags, nil
 }
 
-func NewActiveCampaignIntegration() *ActiveCampaignIntegration {
-	return &ActiveCampaignIntegration{
-		APIURL:   os.Getenv("ACTIVECAMPAIGN_API_URL"),
-		APIKey:   os.Getenv("ACTIVECAMPAIGN_API_KEY"),
-		TagsPath: "/api/3/tags",
+func NewActiveCampaignIntegration(id int, conn *sqlx.DB) (*ActiveCampaignIntegration, error) {
+	var apiKey string
+	var apiURL string
+
+	err := getFieldValue(conn, id, "api_key", &apiKey)
+	if err != nil {
+		return nil, err
 	}
+
+	err = getFieldValue(conn, id, "api_url", &apiURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ActiveCampaignIntegration{
+		APIURL:   apiURL,
+		APIKey:   apiKey,
+		TagsPath: "/api/3/tags",
+	}, nil
 }
